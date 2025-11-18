@@ -1,4 +1,4 @@
-// Environment configuration
+// Environment configuration - Updated for Render deployment
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://porter-managment-1.onrender.com/api';
 
 // Token management
