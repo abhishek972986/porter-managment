@@ -25,7 +25,7 @@ export const DashboardPage: React.FC = () => {
 
   const { data: allPorters = [] } = useQuery<Porter[]>({
     queryKey: ['porters'],
-    queryFn: portersAPI.getAll,
+    queryFn: () => portersAPI.getAll(),
   });
 
   const { data: activities = [] } = useQuery<Activity[]>({

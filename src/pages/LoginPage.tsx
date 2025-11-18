@@ -30,7 +30,7 @@ export const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      const response = await authAPI.login(data.email, data.password);
+      await authAPI.login(data.email, data.password);
       // Response contains: { user, accessToken, refreshToken }
       toast.success('Login successful!');
       navigate('/dashboard');

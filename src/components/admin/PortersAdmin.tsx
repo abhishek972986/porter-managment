@@ -18,7 +18,7 @@ export const PortersAdmin: React.FC = () => {
 
   const { data: porters = [], isLoading } = useQuery({
     queryKey: ['porters'],
-    queryFn: portersAPI.getAll,
+    queryFn: () => portersAPI.getAll(),
   });
 
   const portersList = Array.isArray(porters) ? porters : [];

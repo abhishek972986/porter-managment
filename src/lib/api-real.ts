@@ -7,7 +7,6 @@ import type {
   Template,
   DashboardStats,
   MonthlyReport,
-  CarrierType,
 } from '@/types';
 import { apiRequest, tokenManager } from './api-client';
 
@@ -40,10 +39,10 @@ export const dashboardAPI = {
     const response: any = await apiRequest('/reports/dashboard');
     // Transform backend response to match frontend interface
     return {
-      totalEntries: response.currentMonth?.totalEntries || 0,
-      totalCost: response.currentMonth?.totalCost || 0,
+      totalCommutesToday: response.currentMonth?.totalEntries || 0,
+      totalCostThisMonth: response.currentMonth?.totalCost || 0,
       activePorters: response.currentMonth?.activePorters || 0,
-      totalPorters: response.totalPorters || 0,
+      pendingDocuments: 0,
     };
   },
 };
@@ -193,7 +192,7 @@ export const templatesAPI = {
     return [];
   },
   
-  upload: async (file: File): Promise<Template> => {
+  upload: async (_file: File): Promise<Template> => {
     // Templates API not yet implemented
     return {} as Template;
   },
@@ -206,12 +205,12 @@ export const reportsAPI = {
     return response.payroll || [];
   },
   
-  exportCSV: async (month: string): Promise<Blob> => {
+  exportCSV: async (_month: string): Promise<Blob> => {
     // Export functionality not yet implemented
     return new Blob([''], { type: 'text/csv' });
   },
   
-  exportPDF: async (month: string): Promise<Blob> => {
+  exportPDF: async (_month: string): Promise<Blob> => {
     // Export functionality not yet implemented
     return new Blob([''], { type: 'application/pdf' });
   },
