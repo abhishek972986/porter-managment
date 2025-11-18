@@ -1,0 +1,28 @@
+/* Calendar day indicators for days with entries */
+.rbc-day-bg.has-entries::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+}
+
+/* Ensure proper positioning context */
+.rbc-day-bg {
+  position: relative;
+}
+
+/* Style for today's date with entries */
+.rbc-today.has-entries::after {
+  background-color: #ef4444;
+}
+
+/* Hover effect on days with entries */
+.rbc-day-bg.has-entries:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+  cursor: pointer;
+}
