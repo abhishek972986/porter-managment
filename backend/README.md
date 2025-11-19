@@ -2,6 +2,12 @@
 
 Complete production-ready backend for Porter Management System built with Node.js, Express, and MongoDB.
 
+## 🌐 Deployed Application
+
+- **Frontend**: [https://porter-managment.vercel.app](https://porter-managment.vercel.app)
+- **Backend API**: [https://porter-managment-1.onrender.com](https://porter-managment-1.onrender.com)
+- **Repository**: [https://github.com/abhishek972986/porter-managment](https://github.com/abhishek972986/porter-managment)
+
 ## 🚀 Features
 
 - **Authentication & Authorization**: JWT-based auth with access and refresh tokens
