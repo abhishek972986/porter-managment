@@ -2,6 +2,11 @@
 
 A complete, production-ready full-stack application for managing porters, attendance tracking, payroll calculation, and reporting.
 
+## 🌐 Live Demo
+
+- **Frontend**: [https://porter-managment.vercel.app](https://porter-managment.vercel.app)
+- **Backend API**: [https://porter-managment-1.onrender.com](https://porter-managment-1.onrender.com)
+
 ## 🚀 Quick Start
 
 ### Prerequisites
