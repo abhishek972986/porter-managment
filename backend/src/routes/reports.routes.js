@@ -16,5 +16,6 @@ router.use(verifyToken);
 
 router.get('/generate', validate(monthSchema), reportsController.generateMonthlyReport);
 router.get('/dashboard', reportsController.getDashboardStats);
+router.get('/porter-nominal-roll', validate(monthSchema), reportsController.downloadNominalRoll);
 
 export default router;

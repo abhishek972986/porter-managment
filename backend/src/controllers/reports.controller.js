@@ -278,3 +278,79 @@ export const getDashboardStats = async (req, res, next) => {
     next(error);
   }
 };
+
+export const downloadNominalRoll = async (req, res, next) => {
+  try {
+    const { month } = req.query;
+
+    if (!month) {
+      throw new AppError('Month parameter is required (YYYY-MM)', 400);
+    }
+
+    const monthDate = parseISO(`${month}-01`);
+    const startDate = startOfMonth(monthDate);
+    const endDate = endOfMonth(monthDate);
+
+    // Aggregate attendance to compute days worked and total amount per porter
+    const data = await Attendance.aggregate([
+      { $match: { date: { $gte: startDate, $lte: endDate } } },
+      {
+        $lookup: {
+          from: 'porters',
+          localField: 'porter',
+          foreignField: '_id',
+          as: 'porterInfo',
+        },
+      },
+      { $unwind: '$porterInfo' },
+      {
+        $group: {
+          _id: '$porter',
+          accountNo: { $first: '$porterInfo.accountNo' },
+          name: { $first: '$porterInfo.name' },
+          fatherName: { $first: '$porterInfo.fatherName' },
+          daysWorked: { $count: {} },
+          totalAmount: { $sum: '$computedCost' },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          accountNo: 1,
+          name: 1,
+          fatherName: 1,
+          daysWorked: 1,
+          totalAmount: 1,
+          perDayRate: {
+            $cond: [{ $gt: ['$daysWorked', 0] }, { $round: [{ $divide: ['$totalAmount', '$daysWorked'] }, 0] }, 0],
+          },
+        },
+      },
+      { $sort: { name: 1 } },
+    ]);
+
+    const { generatePorterExcel } = await import('../utils/excel/generatePorterNominalRoll.js');
+    const workbook = await generatePorterExcel(
+      data.map((d) => ({
+        accountNo: d.accountNo,
+        name: d.name,
+        fatherName: d.fatherName,
+        daysWorked: d.daysWorked,
+        perDayRate: d.perDayRate,
+        totalAmount: d.totalAmount,
+      })),
+      month
+    );
+
+    res.setHeader('Content-Disposition', `attachment; filename=Nominal_Roll_${month}.xlsx`);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    next(error);
+  }
+};

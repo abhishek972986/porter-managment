@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { FileText, Upload } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { templatesAPI } from '@/lib/api';
+import { templatesAPI, reportsAPI } from '@/lib/api';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 export const DocumentsPage: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -20,10 +22,38 @@ export const DocumentsPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Document Generator</h1>
           <p className="text-gray-600 mt-1">Create and manage monthly documents</p>
         </div>
-        <Button>
-          <Upload className="w-4 h-4 mr-2" />
-          Upload Template
-        </Button>
+        <div className="flex items-center gap-3">
+          <input
+            type="month"
+            defaultValue={format(new Date(), 'yyyy-MM')}
+            id="nominal-month"
+            className="px-3 py-2 border rounded"
+          />
+          <Button
+            onClick={async () => {
+              try {
+                const monthInput = (document.getElementById('nominal-month') as HTMLInputElement)
+                  .value;
+                if (!monthInput) return toast.error('Select a month');
+                const blob = await reportsAPI.downloadNominalRoll(monthInput);
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Nominal_Roll_${monthInput}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                toast.success('Nominal roll downloaded');
+              } catch (err: unknown) {
+                const msg = err instanceof Error ? err.message : String(err);
+                toast.error(msg || 'Download failed');
+              }
+            }}
+          >
+            Download Nominal Roll
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

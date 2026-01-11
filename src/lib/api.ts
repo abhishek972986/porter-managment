@@ -7,7 +7,7 @@ import type {
   Template,
   DashboardStats,
 } from '@/types';
-import { apiRequest, tokenManager } from './api-client';
+import { apiRequest, tokenManager, API_BASE_URL } from './api-client';
 
 // Auth
 export const authAPI = {
@@ -254,6 +254,21 @@ export const reportsAPI = {
         }>;
       };
     }>(`/reports/generate?month=${month}`);
+  },
+  downloadNominalRoll: async (month: string): Promise<Blob> => {
+    const token = tokenManager.getAccessToken();
+    const resp = await fetch(`${API_BASE_URL}/reports/porter-nominal-roll?month=${month}`, {
+      method: 'GET',
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(text || 'Failed to download nominal roll');
+    }
+    const blob = await resp.blob();
+    return blob;
   },
 };
 
