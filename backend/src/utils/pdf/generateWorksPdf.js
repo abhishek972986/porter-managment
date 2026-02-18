@@ -19,25 +19,6 @@ const replacePlaceholder = (html, key, value) => {
   return html.replaceAll(placeholder, value ?? '');
 };
 
-// Detect environment and load appropriate puppeteer package
-const isProduction = process.env.NODE_ENV === 'production';
-const isLinux = process.platform === 'linux';
-
-let puppeteer;
-let chromium;
-
-if (isProduction && isLinux) {
-  // Production on Linux (Render) - use serverless chromium
-  const puppeteerCore = await import('puppeteer-core');
-  const chromiumPkg = await import('@sparticuz/chromium');
-  puppeteer = puppeteerCore.default;
-  chromium = chromiumPkg.default;
-} else {
-  // Local development (Windows/Mac) - use regular puppeteer
-  const puppeteerPkg = await import('puppeteer');
-  puppeteer = puppeteerPkg.default;
-}
-
 export const generateWorksPdf = async (payload) => {
   let html = await fs.readFile(templatePath, 'utf-8');
 
@@ -53,17 +34,23 @@ export const generateWorksPdf = async (payload) => {
   html = replacePlaceholder(html, 'remarks', payload.remarks || '');
 
   let browser;
+  const isLinux = process.platform === 'linux';
   
-  if (chromium) {
-    // Production - use serverless chromium
-    browser = await puppeteer.launch({
+  if (isLinux) {
+    // Production on Linux (Render/AWS) - use serverless chromium
+    const puppeteerCore = (await import('puppeteer-core')).default;
+    const chromium = (await import('@sparticuz/chromium')).default;
+    
+    browser = await puppeteerCore.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
     });
   } else {
-    // Local development - use regular puppeteer
+    // Local development (Windows/Mac) - use regular puppeteer
+    const puppeteer = (await import('puppeteer')).default;
+    
     browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
