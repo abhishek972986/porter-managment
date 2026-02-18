@@ -2,6 +2,7 @@ services:
   - type: web
     name: porter-backend
     env: node
+    rootDir: backend
     region: singapore
     plan: free
     buildCommand: npm install && npx puppeteer browsers install chrome && npm run build
