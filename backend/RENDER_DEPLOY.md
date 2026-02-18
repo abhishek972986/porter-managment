@@ -32,6 +32,7 @@ git push origin main
 - **Root Directory**: `backend`
 - **Runtime**: `Node`
 - **Build Command**: `npm install`
+ - **Build Command**: `npm install && npx puppeteer browsers install chrome`
 - **Start Command**: `node src/server.js`
 - **Plan**: Free
 
@@ -49,6 +50,7 @@ Click **"Advanced"** and add these environment variables:
 | `JWT_ACCESS_EXPIRES_IN` | `15m` |
 | `JWT_REFRESH_EXPIRES_IN` | `7d` |
 | `FRONTEND_URL` | Your Vercel frontend URL (e.g., `https://porter-managment.vercel.app`) |
+| `PUPPETEER_CACHE_DIR` | `/opt/render/.cache/puppeteer` |
 
 ### 5. Deploy
 

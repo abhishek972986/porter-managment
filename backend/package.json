@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "build": "echo 'No build step required'",
     "dev": "nodemon src/server.js",
-    "seed": "node src/scripts/seed.js"
+    "seed": "node src/scripts/seed.js",
+    "install:chrome": "npx puppeteer browsers install chrome"
   },
   "keywords": [
     "porter",
