@@ -36,7 +36,6 @@ const porterSchema = new mongoose.Schema(
   }
 );
 
-porterSchema.index({ uid: 1 });
 porterSchema.index({ active: 1 });
 
 const Porter = mongoose.model('Porter', porterSchema);

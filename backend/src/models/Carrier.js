@@ -35,8 +35,6 @@ const carrierSchema = new mongoose.Schema(
   }
 );
 
-carrierSchema.index({ name: 1 });
-
 const Carrier = mongoose.model('Carrier', carrierSchema);
 
 export default Carrier;

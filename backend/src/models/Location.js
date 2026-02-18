@@ -32,7 +32,6 @@ const locationSchema = new mongoose.Schema(
   }
 );
 
-locationSchema.index({ code: 1 });
 locationSchema.index({ active: 1 });
 
 const Location = mongoose.model('Location', locationSchema);

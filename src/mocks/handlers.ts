@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { http, HttpResponse } from 'msw';
 import type { AttendanceEntry, Porter, Location, Carrier, CommuteCost, Template, DashboardStats, MonthlyReport } from '@/types';
 
