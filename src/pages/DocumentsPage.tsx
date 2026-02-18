@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { templatesAPI } from '@/lib/api';
-import { API_BASE_URL, tokenManager } from '@/lib/api-client';
+import { API_BASE_URL, refreshAccessToken, tokenManager } from '@/lib/api-client';
 
 interface DsFormData {
   brigade: string;
@@ -70,19 +70,39 @@ export const DocumentsPage: React.FC = () => {
     setIsGeneratingPdf(true);
 
     try {
-      const response = await fetch(PDF_GENERATE_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(tokenManager.getAccessToken()
-            ? { Authorization: `Bearer ${tokenManager.getAccessToken()}` }
-            : {}),
-        },
-        body: JSON.stringify(dsFormData),
-      });
+      const executeRequest = async () =>
+        fetch(PDF_GENERATE_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(tokenManager.getAccessToken()
+              ? { Authorization: `Bearer ${tokenManager.getAccessToken()}` }
+              : {}),
+          },
+          body: JSON.stringify(dsFormData),
+        });
+
+      let response = await executeRequest();
+
+      if (response.status === 401 && tokenManager.getRefreshToken()) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          response = await executeRequest();
+        }
+      }
 
       if (!response.ok) {
-        throw new Error(`PDF generation failed with status ${response.status}`);
+        let backendMessage = '';
+        try {
+          const err = await response.json();
+          backendMessage = err?.message || err?.error || '';
+        } catch {
+          backendMessage = await response.text();
+        }
+
+        throw new Error(
+          backendMessage || `PDF generation failed with status ${response.status}`
+        );
       }
 
       const blob = await response.blob();
@@ -97,8 +117,9 @@ export const DocumentsPage: React.FC = () => {
       URL.revokeObjectURL(url);
 
       setPdfMessage('PDF generated and downloaded successfully.');
-    } catch {
-      setPdfError('Failed to generate PDF. Please check backend server and login status.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to generate PDF.';
+      setPdfError(message);
     } finally {
       setIsGeneratingPdf(false);
     }

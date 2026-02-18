@@ -1,5 +1,9 @@
-// Environment configuration - Updated for Render deployment
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://porter-managment-1.onrender.com/api';
+// Environment configuration
+const DEFAULT_API_BASE_URL = import.meta.env.DEV
+  ? 'http://localhost:5000/api'
+  : 'https://porter-managment-1.onrender.com/api';
+
+export const API_BASE_URL = import.meta.env.VITE_API_URL || DEFAULT_API_BASE_URL;
 
 // Token management
 export const tokenManager = {
@@ -69,7 +73,7 @@ export async function apiRequest<T>(
 }
 
 // Refresh token function
-async function refreshAccessToken(): Promise<boolean> {
+export async function refreshAccessToken(): Promise<boolean> {
   const refreshToken = tokenManager.getRefreshToken();
   if (!refreshToken) return false;
 
