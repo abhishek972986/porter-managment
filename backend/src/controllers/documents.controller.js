@@ -32,15 +32,22 @@ export const generateDocumentPdf = async (req, res, next) => {
       throw new AppError('No data provided. Please send document form data in request body.', 400);
     }
 
-    const pdfBuffer = await generateWorksPdf(data);
+    const generatedPdf = await generateWorksPdf(data);
+    const pdfBuffer = Buffer.isBuffer(generatedPdf) ? generatedPdf : Buffer.from(generatedPdf);
+
+    if (!pdfBuffer || pdfBuffer.length === 0) {
+      throw new AppError('PDF generation returned an empty document.', 500);
+    }
+
     const safeUnit = (data.unitName || 'unit').replace(/\s+/g, '-').toLowerCase();
     const fileName = `document-${safeUnit}-${Date.now()}.pdf`;
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     res.setHeader('Content-Length', pdfBuffer.length);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
 
-    res.send(pdfBuffer);
+    res.status(200).end(pdfBuffer);
   } catch (error) {
     next(error);
   }

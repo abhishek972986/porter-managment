@@ -22,6 +22,17 @@ interface DsFormData {
 const PDF_GENERATE_URL =
   import.meta.env.VITE_PDF_GENERATE_URL || `${API_BASE_URL}/documents/generate-pdf`;
 
+const PDF_SIGNATURE = [0x25, 0x50, 0x44, 0x46, 0x2d]; // %PDF-
+
+const hasPdfSignature = (bytes: Uint8Array) =>
+  PDF_SIGNATURE.every((value, index) => bytes[index] === value);
+
+const getFileNameFromDisposition = (contentDisposition: string | null) => {
+  if (!contentDisposition) return null;
+  const match = contentDisposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
+  return match?.[1]?.trim() || null;
+};
+
 export const DocumentsPage: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -75,6 +86,7 @@ export const DocumentsPage: React.FC = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Accept: 'application/pdf',
             ...(tokenManager.getAccessToken()
               ? { Authorization: `Bearer ${tokenManager.getAccessToken()}` }
               : {}),
@@ -105,12 +117,31 @@ export const DocumentsPage: React.FC = () => {
         );
       }
 
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.toLowerCase().includes('application/pdf')) {
+        const nonPdfBody = await response.text();
+        throw new Error(nonPdfBody || `Expected PDF response but received: ${contentType || 'unknown content type'}`);
+      }
+
       const blob = await response.blob();
+      if (blob.size === 0) {
+        throw new Error('Generated PDF is empty. Please check backend PDF generation.');
+      }
+
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      if (!hasPdfSignature(bytes)) {
+        throw new Error('Response is not a valid PDF document.');
+      }
+
       const safeUnit = (dsFormData.unitName || 'unit').replace(/\s+/g, '-').toLowerCase();
-      const url = URL.createObjectURL(blob);
+      const fallbackName = `document-${safeUnit}-${Date.now()}.pdf`;
+      const suggestedName = getFileNameFromDisposition(response.headers.get('content-disposition'));
+      const fileName = suggestedName || fallbackName;
+      const validPdfBlob = new Blob([bytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(validPdfBlob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = `document-${safeUnit}-${Date.now()}.pdf`;
+      anchor.download = fileName;
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
