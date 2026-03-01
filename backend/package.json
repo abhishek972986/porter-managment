@@ -4,6 +4,11 @@
   "description": "Backend API for Porter Management System",
   "main": "src/server.js",
   "type": "module",
+  "homepage": "https://porter-managment-1.onrender.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhishek972986/porter-managment"
+  },
   "scripts": {
     "start": "node src/server.js",
     "build": "echo 'No build step required'",
